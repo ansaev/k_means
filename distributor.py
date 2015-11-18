@@ -1,9 +1,20 @@
 __author__ = 'ansaev'
+from abc import ABCMeta, abstractmethod, abstractproperty
 
 
-class Cluster(object):
+class Distributor(object):
+    __metaclass__ = ABCMeta
 
-    def __init__(self):
-        self.points_indexes = []
-        self.point =
+    @abstractmethod
+    def distribute(self, points):
+        """disribute it in some ways"""
+
+    @abstractmethod
+    def check(self):
+        """check the result the error"""
+
+
+
+
+
 
