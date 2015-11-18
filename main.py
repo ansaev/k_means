@@ -3,12 +3,10 @@ __author__ = 'ansaev'
 from model import Point,Points
 from kmeans import Kmeans
 
-point_dim = 2
-points_num = 10
-centroids_num = 5
+centroids_num = 3
 # points = [Point(dim=point_dim, set_id=i) for i in range(points_num)]
 points = Points()
-points.init(file_name="separated_sets.xls")
+points.init(file_name="iris.xls", start_row=0, dim=4)
 # for point in points.points:
 #     point.print()
 

@@ -6,8 +6,8 @@ from model import Point
 class Kmeans(Distributor):
 
     def __init__(self, points, centroid_num):
-        self.max_iterations = 4
-        self.min_changes = 3
+        self.max_iterations = 15
+        self.min_error = 0.03
         self.centroid_num = centroid_num
         self.points = points
         self.centroids = [Point(dim=self.points[i].dim, set_id=i, cords=self.points[i].cords) for i in range(self.centroid_num)]
@@ -17,20 +17,23 @@ class Kmeans(Distributor):
         self.distr_points()
 
     def distribute(self):
-        print('cluster learn:')
-        channges = 0
+        print('cluster learn:', self.centroid_num)
+        error = 1
         for i in range(self.max_iterations):
-            channges = 0
+            error = 1
             # print('step ' + str(i))
             self.calc_centr()
-            channges = self.distr_points()
-            # print('now we have:')
-            # for point in self.points:
-            #     point.print()
-            if channges < self.min_changes:
-                print('quit on step: ' + str(i) + " cause have got only " + str(channges) + " changes")
+            self.distr_points()
+            error = self.check()
+            print('step %d, error is %d' % (i, error))
+            print(str( self.min_error))
+            if error <= self.min_error:
+                print("quit on step: %d cause error is only %d " % (i, error))
                 break
-        print('done all %d steps, last changes: %d' %(self.max_iterations, channges))
+        else:
+            print('done all %d steps, error is: %d' % (self.max_iterations, error))
+        for point in self.points:
+            point.print()
         return
 
     def calc_centr(self):
@@ -83,7 +86,11 @@ class Kmeans(Distributor):
             if set_hash[point.set_id] is not point.distributed_set_id:
                 error += 1
         error /= len(self.points)
-        print('error is: ', error)
+        # print('error is: ', error)
+        print('hash is', set_hash)
+        # print('points')
+        # for point in self.points:
+        #     point.print()
         return error
 
 
