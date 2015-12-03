@@ -6,8 +6,11 @@ from model import Point
 class Kmeans(Distributor):
 
     def __init__(self, points, centroid_num):
-        self.max_iterations = 600
-        self.min_error = 0.03
+        self.last_error = 0
+        self.iterations_no_changes = 0
+        self.max_iterations_no_changes = 20
+        self.max_iterations = 60000
+        self.min_error = 0.09
         self.centroid_num = centroid_num
         self.points = points
         self.centroids = [Point(dim=self.points[i].dim, set_id=i, cords=self.points[15*i].cords) for i in range(self.centroid_num)]
@@ -17,15 +20,19 @@ class Kmeans(Distributor):
         print('cluster learn:', self.centroid_num)
         error = 1
         for i in range(self.max_iterations):
-            error = 0.0
-            # print('step ' + str(i))
             self.calc_centr()
             self.distr_points()
             error = self.check()
             print('step %d, error is %f' % (i, error))
             print(str( self.min_error))
+            if self.last_error == error:
+                self.iterations_no_changes += 1
+            self.last_error = error
             if error <= self.min_error:
                 print("quit on step: %d cause error is only %f " % (i, error))
+                break
+            elif self.iterations_no_changes >= self.max_iterations_no_changes:
+                print("quit on step: %d cause of %d iterations without changes, error is %f " % (i, self.iterations_no_changes, error))
                 break
         else:
             print('done all %d steps, error is: %f' % (self.max_iterations, error))
@@ -47,7 +54,6 @@ class Kmeans(Distributor):
                 for i in range(centr.dim):
                     cords[i] /= points_num
             centr.cords = cords
-            # centr.print()
 
     def distr_points(self):
         # distribute points
@@ -73,21 +79,19 @@ class Kmeans(Distributor):
                     if int(point.set_id) in real_set_id:
                         cluster_distribution[int(point.set_id)] += 1
             real_id_win = cluster_distribution.index(max(cluster_distribution))
+            if real_id_win not in real_set_id:
+                real_id_win = real_set_id.pop()
             set_hash[real_id_win] = distrib_id
-            real_set_id.remove(real_id_win)
+            try:
+                real_set_id.remove(real_id_win)
+            except KeyError:
+                print('EEEEE', real_set_id, real_id_win, cluster_distribution, set_hash)
         error = 0
         for point in self.points:
             if int(set_hash[point.set_id]) != int(point.distributed_set_id):
                 error += 1
-                # print("hop", 'set_id', set_hash[point.set_id], 'distributed id', point.distributed_set_id, error/len(self.points))
-            # else:
-            #     print('opa', 'set_id', point.set_id, 'distributed id', point.distributed_set_id)
         error /= len(self.points)
-        # print('error is: ', error)
         print('hash is', set_hash)
-        # print('points')
-        # for point in self.points:
-        #     point.print()
         return error
 
 

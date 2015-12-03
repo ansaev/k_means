@@ -23,7 +23,7 @@ class Point(object):
         return distance
 
     def print(self):
-        print('point', self.cords, 'distributed class: ' + str(self.distributed_set_id), ', self class = ' + str(self.set_id))
+        print('point', self.cords, 'dim', self.dim, 'distributed class: ' + str(self.distributed_set_id), ', self class = ' + str(self.set_id))
         return
 
 
