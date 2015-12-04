@@ -6,7 +6,7 @@ class Distributor(object):
     __metaclass__ = ABCMeta
 
     @abstractmethod
-    def distribute(self, points):
+    def distribute(self):
         """disribute it in some ways"""
 
     @abstractmethod
