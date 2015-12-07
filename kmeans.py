@@ -26,8 +26,8 @@ class Kmeans(Distributor):
             self.calc_centr()
             self.distr_points()
             error = self.check()
-            print('step %d, error is %f' % (i, error))
-            print(str(self.min_error))
+            # print('step %d, error is %f' % (i, error))
+            # print(str(self.min_error))
             if self.last_error == error:
                 self.iterations_no_changes += 1
             self.last_error = error
