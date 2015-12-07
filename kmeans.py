@@ -1,6 +1,7 @@
 __author__ = 'ansaev'
 from distributor import Distributor
 from model import Point
+import random
 
 
 class Kmeans(Distributor):
@@ -8,12 +9,14 @@ class Kmeans(Distributor):
     def __init__(self, points, centroid_num):
         self.last_error = 0
         self.iterations_no_changes = 0
-        self.max_iterations_no_changes = 20
+        self.max_iterations_no_changes = 15
         self.max_iterations = 60000
         self.min_error = 0.09
         self.centroid_num = centroid_num
         self.points = points
-        self.centroids = [Point(dim=self.points[i].dim, set_id=i, cords=self.points[15*i].cords) for i in range(self.centroid_num)]
+        self.points_num = len(points)
+        self.centroids = []
+        self.init_centroids()
         self.distr_points()
 
     def distribute(self):
@@ -24,7 +27,7 @@ class Kmeans(Distributor):
             self.distr_points()
             error = self.check()
             print('step %d, error is %f' % (i, error))
-            print(str( self.min_error))
+            print(str(self.min_error))
             if self.last_error == error:
                 self.iterations_no_changes += 1
             self.last_error = error
@@ -36,9 +39,18 @@ class Kmeans(Distributor):
                 break
         else:
             print('done all %d steps, error is: %f' % (self.max_iterations, error))
-        for point in self.points:
-            point.print()
+        # for point in self.points:
+        #     point.print()
         return
+
+    def init_centroids(self):
+        self.centroids = [Point(dim=self.points[i].dim, set_id=i, cords=self.points[random.randrange(0, self.points_num)].cords) for i in range(self.centroid_num)]
+        # self.centroids.append(Point(dim=self.points[0].dim, set_id=0, cords=self.points[random.randrange(0, self.points_num)].cords))
+        # for i in range(1,self.centroid_num):
+        #     for point in self.points
+        #     print(i)
+        return
+
 
     def calc_centr(self):
         # print('callculate new cnetr')
@@ -74,24 +86,33 @@ class Kmeans(Distributor):
         real_set_id = {i for i in range(self.centroid_num)}
         for distrib_id in range(self.centroid_num):
             cluster_distribution = [0 for i in range(self.centroid_num)]
+            distrib_points_num = 0
             for point in self.points:
                 if point.distributed_set_id == distrib_id:
+                    distrib_points_num += 1
                     if int(point.set_id) in real_set_id:
                         cluster_distribution[int(point.set_id)] += 1
             real_id_win = cluster_distribution.index(max(cluster_distribution))
             if real_id_win not in real_set_id:
                 real_id_win = real_set_id.pop()
-            set_hash[real_id_win] = distrib_id
-            try:
+            else:
                 real_set_id.remove(real_id_win)
-            except KeyError:
-                print('EEEEE', real_set_id, real_id_win, cluster_distribution, set_hash)
+            set_hash[real_id_win] = distrib_id
         error = 0
         for point in self.points:
-            if int(set_hash[point.set_id]) != int(point.distributed_set_id):
-                error += 1
+            try:
+                if int(set_hash[point.set_id]) != int(point.distributed_set_id):
+                    error += 1
+            except KeyError:
+                print('key error why trying to get hash assosiate')
+                print('set hash is: ', set_hash)
+                print('try to get %d from hash to check with point distributed_id = %d'%(point.set_id, point.distributed_set_id))
         error /= len(self.points)
-        print('hash is', set_hash)
+        distr = [[0 for j in range(self.centroid_num)] for i in range(self.centroid_num)]
+        for point in self.points:
+            distr[int(point.distributed_set_id)][int(point.set_id)] += 1
+            pass
+        print('hash is', set_hash, 'distributed', distr)
         return error
 
 
