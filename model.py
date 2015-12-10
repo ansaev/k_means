@@ -31,10 +31,12 @@ class Points(object):
     def __init__(self):
         self.points = []
 
-    def init(self, file_name, sheet_num=0, start_row=1, start_cell=0, dim=5):
+    def init(self, file_name, sheet_num=0, start_row=1, end_row=None, start_cell=0, dim=5):
         rb = xlrd.open_workbook(file_name, formatting_info=True)
         sheet = rb.sheet_by_index(sheet_num)
-        for row_num in range(start_row, sheet.nrows):
+        if end_row is None:
+            end_row = sheet.nrows
+        for row_num in range(start_row, end_row):
             row = sheet.row_values(row_num)
             point = Point(cords=row[start_cell:start_cell+dim], set_id=row[start_cell+dim], dim=dim)
             self.points.append(point)
